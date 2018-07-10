@@ -6,7 +6,9 @@ Change photo or video's name by its EXIF information
 ## Supported formats:
 - .DNG
 - .MOV
+- .JPG
 ## Ussage:
-python3 main.py -p -v
+python3 main.py -p -v -d dir
 - -p, for photos
 - -v, for videos
+- -d, for directory

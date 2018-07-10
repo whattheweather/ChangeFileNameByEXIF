@@ -1,10 +1,17 @@
 import os
-# import exifread
-# from hachoir import (metadata, parser)
+import exifread
+from hachoir import (metadata, parser)
 import sys, getopt
 
-PHOTO_POSTFIX = ['.dng']
+PHOTO_POSTFIX = ['.dng', '.jpg']
 VIDEO_POSTFIX = ['.mov']
+DEVICE_TYPE = ['MavicPro', 'iPhone6s']
+
+def isChanged(filename):
+    for name in DEVICE_TYPE:
+        if filename.find(name) != -1:
+            return 1
+    return 0
 
 def isPhoto(postfix):
     return 1 if postfix.lower() in PHOTO_POSTFIX else 0
@@ -44,7 +51,7 @@ def changePhotoName(filename, postfix):
 
     print(filename, '->', newname)
 
-def changeVideoName(filename):
+def changeVideoName(filename, postfix):
 
     dji = iphone = 0
     if 'DJI' in filename:
@@ -65,11 +72,13 @@ def changeVideoName(filename):
                 hour = int(createTime[26:28])
                 minute = createTime[29:31]
                 second = createTime[32:34]
+                ### deal with wrong time zone in iPhone 6s
                 if iphone:
                     hour += 8
                     if hour > 24:
                         hour -= 24
                         day += 1
+                ##
                 hour = str(hour).zfill(2)
                 day = str(day).zfill(2)
 
@@ -88,22 +97,30 @@ def changeVideoName(filename):
     print(filename, '->', newname)
 
 change_photo = change_video = 0
-opts, args = getopt.getopt(sys.argv[1:], "pv")
-for op,val in opts:
-    print(op)
+dir = '.'
+
+opts, args = getopt.getopt(sys.argv[1:], "pvd:")
+for op, val in opts:
     if op == "-p":
         change_photo = 1
     elif op == "-v":
         change_video = 1
+    elif op == '-d':
+        dir = val
 
 if not change_photo + change_video:
     print('No file type specified, use -v for videos and -p for photos')
+    sys.exit()
 
-for parent, dirnames, filenames in os.walk('.'):
+print('\nHandling files in {}\n'.format(dir))
+for parent, dirnames, filenames in os.walk(dir):
     for filename in filenames:
-        if len(filename) < 5:
+        postfix = filename[-4:] if len(filename) > 4 else '_'
+        if postfix[0] != '.':
             continue
-        postfix = filename[-4:]
+        if isChanged(filename):
+            print('{} ->'.format(filename))
+            continue
         if change_photo and isPhoto(postfix):
             changePhotoName(filename, postfix)
         if change_video and isVideo(postfix):
