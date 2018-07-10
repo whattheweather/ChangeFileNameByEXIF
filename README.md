@@ -8,7 +8,6 @@ Change photo or video's name by its EXIF information
 - .MOV
 - .JPG
 ## Ussage:
-python3 main.py -p -v -d dir
+python3 main.py -p -v
 - -p, for photos
 - -v, for videos
-- -d, for directory

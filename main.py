@@ -42,17 +42,20 @@ def changePhotoName(filename, postfix):
     createTime = str(exif['EXIF DateTimeOriginal']).replace(':', '-') \
         .replace('201', '1').replace(' ', '_')
 
-    newname = createTime + '_' + model + postfix.lower()
-    
-    if(os.path.exists(newname)):
-        recordException(filename, 'name occupied')
+    # if photos were shot in the same second, modify the newname
+    basename = createTime + '_' + model
+    newname = basename + postfix.lower()
+
+    count = 0
+    while os.path.exists(newname):
+        newname = basename + '_' + str(count) + postfix.lower()
+        count += 1
 
     os.rename(filename, newname)
 
     print(filename, '->', newname)
 
 def changeVideoName(filename, postfix):
-
     dji = iphone = 0
     if 'DJI' in filename:
         dji = 1
@@ -106,7 +109,8 @@ for op, val in opts:
     elif op == "-v":
         change_video = 1
     elif op == '-d':
-        dir = val
+        # dir = val
+        pass
 
 if not change_photo + change_video:
     print('No file type specified, use -v for videos and -p for photos')
